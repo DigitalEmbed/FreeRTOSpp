@@ -95,7 +95,16 @@ namespace freertos {
                             uint32_t timeout_ticks = pdMS_TO_TICKS(timeout_ms);
 
                             while (!condition(arguments)) {
-                                if (timeout_ms != max_delay_ms && (xTaskGetTickCount() - start_time >= timeout_ticks)) {
+                                uint32_t current_time = xTaskGetTickCount();
+                                uint32_t elapsed_ticks;
+                                
+                                if (current_time >= start_time) {
+                                    elapsed_ticks = current_time - start_time;
+                                } else {
+                                    elapsed_ticks = (UINT32_MAX - start_time) + current_time + 1;
+                                }
+                                
+                                if (timeout_ms != max_delay_ms && elapsed_ticks >= timeout_ticks) {
                                     return false;
                                 }
                                 vTaskDelay(pdMS_TO_TICKS(observer_delay_ms));
@@ -347,3 +356,4 @@ namespace freertos {
     
     using this_task = abstract::task::self;
 }
+
