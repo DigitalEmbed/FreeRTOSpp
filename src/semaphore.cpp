@@ -63,3 +63,7 @@ bool semaphore::take_from_isr(void) {
 semaphore_handle& semaphore::get_handle(void) {
     return this->handle;
 }
+
+bool semaphore::supports_isr(void) const {
+    return (this->semaphore_type == type::binary || this->semaphore_type == type::counting);
+}

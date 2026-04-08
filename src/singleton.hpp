@@ -4,19 +4,33 @@
 
 namespace freertos {
     namespace stack {
+        /**
+         * @brief Statically-allocated single-slot queue that always holds the latest value.
+         *
+         * A `singleton` is a queue with a capacity of exactly one item.  Every call
+         * to `push()` overwrites any previously stored value without blocking, so
+         * the reader always retrieves the most recently written item.
+         *
+         * Typical use: sharing the current state of a sensor or flag between a
+         * producer task and one or more consumer tasks.
+         *
+         * @tparam DATA_TYPE Type of the stored element.  Must be trivially copyable.
+         */
         template <typename DATA_TYPE>
         class singleton : public abstract::collection<DATA_TYPE> {
         private:
-            DATA_TYPE data;
+            queue_struct buffer;                        ///< Static FreeRTOS queue control block.
+            uint8_t storage_area[sizeof(DATA_TYPE)];    ///< Raw byte storage for the single item.
         public:
+            /** @brief Creates the singleton queue with static allocation. */
             singleton(void) :
-            abstract::collection<DATA_TYPE>(abstract::collection<DATA_TYPE>::send_mode::single, true, 1) 
+            abstract::collection<DATA_TYPE>(abstract::collection<DATA_TYPE>::send_mode::single, true, 1)
             {
                 if (this->handle != nullptr) {
                     return;
                 }
 
-                this->handle = xQueueCreateStatic(1, sizeof(DATA_TYPE), (uint8_t*)&this->data, &this->buffer);
+                this->handle = xQueueCreateStatic(1, sizeof(DATA_TYPE), this->storage_area, &this->buffer);
             }
 
             using abstract::collection<DATA_TYPE>::pop;
