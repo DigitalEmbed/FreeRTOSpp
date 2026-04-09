@@ -28,8 +28,16 @@ namespace freertos {
     /**
      * @brief Proxy object representing one bit inside an `event_group`.
      *
-     * Returned by `event_group::operator[]`.  Supports read and write via
-     * implicit conversions and `operator=`.
+     * Returned by `event_group::operator[]`.  Supports read via implicit
+     * conversions and write via `operator=`:
+     *
+     * @code
+     * events[0] = true;      // set
+     * events[1] = false;     // clear
+     * events[0] = events[1]; // copy
+     * bool b   = events[2];  // read as bool
+     * int8_t v = events[3];  // read as int8_t
+     * @endcode
      *
      * @note Never store an `event_bit_ref` across statements.  It holds a
      *       pointer into the parent `event_group`; if the group is destroyed
@@ -135,17 +143,17 @@ namespace freertos {
          * @code
          * freertos::stack::event_group events;
          *
-         * events[0] = true;           // set bit 0
-         * events[1] = false;          // clear bit 1
-         * events[0] = events[1];      // copy bit 1 into bit 0
+         * events[0] = true;            // set bit 0
+         * events[1] = false;           // clear bit 1
+         * events[0] = events[1];       // copy bit 1 into bit 0
          *
-         * bool b   = events[2];       // read bit 2 as bool
-         * int8_t v = events[3];       // read bit 3 as int8_t (0 or 1)
+         * bool b   = events[2];        // read as bool
+         * int8_t v = events[3];        // read as int8_t (0 or 1)
          *
-         * if (!events.set(30, true))  {} // out-of-bounds: returns false
+         * bool ok = events.set(30, true); // out-of-bounds: returns false
          *
-         * for (uint32_t i = 0; i < constants::max_event_group_bits; i++) {
-         *     bool value = events[i]; // iterate with index available
+         * for (uint32_t i = 0; i < 8; i++) {
+         *     bool value = events[i];  // index always available
          * }
          * @endcode
          */
