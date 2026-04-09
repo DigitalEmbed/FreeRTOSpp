@@ -137,36 +137,6 @@ bool event_group::is_valid(void) const {
 }
 
 // =============================================================================
-// abstract::event_group::iterator
-// =============================================================================
-
-event_group::iterator::iterator(event_group* parent, uint32_t index) :
-parent(parent),
-index(index)
-{}
-
-event_bit_ref event_group::iterator::operator*(void) {
-    return event_bit_ref(&parent->handle, index);
-}
-
-event_group::iterator& event_group::iterator::operator++(void) {
-    ++index;
-    return *this;
-}
-
-bool event_group::iterator::operator!=(const iterator& other) const {
-    return index != other.index;
-}
-
-event_group::iterator event_group::begin(void) {
-    return iterator(this, 0);
-}
-
-event_group::iterator event_group::end(void) {
-    return iterator(this, max_event_group_bits);
-}
-
-// =============================================================================
 // stack::event_group
 // =============================================================================
 

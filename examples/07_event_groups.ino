@@ -9,7 +9,7 @@
  *  - Implicit conversions — bool, int8_t, uint8_t, int.
  *  - set() / get() — explicit methods that return false on out-of-bounds.
  *  - set_from_isr() / get_from_isr() — ISR-safe variants.
- *  - Range-based for — iterate all max_event_group_bits bits.
+ *  - Indexed for loop — iterate all max_event_group_bits bits with index available.
  *  - Runtime enforcement — configASSERT + no-op on index >= max_event_group_bits.
  *
  * Target: ESP32 / STM32 with Arduino framework.
@@ -96,10 +96,10 @@ static void demo_set_get() {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Range-based for — iterate all max_event_group_bits bits
+// 3. Indexed for loop — iterate bits with index available
 // ---------------------------------------------------------------------------
-static void demo_range_for() {
-    Serial.println("\n--- 3. Range-based for ---");
+static void demo_iteration() {
+    Serial.println("\n--- 3. Indexed iteration ---");
 
     // Set a known pattern before iterating.
     events[0] = true;
@@ -111,30 +111,23 @@ static void demo_range_for() {
     events[6] = true;
     events[7] = false;
 
+    // Index is always available — no ambiguity about which bit is being read.
     Serial.print("  bits 0-7: ");
-    uint32_t i = 0;
-    for (const auto& bit : events) {
-        bool value = bit;               // implicit conversion inside the loop
-        if (i < 8) {
-            Serial.printf("[%lu]=%d ", i, value);
-        }
-        i++;
+    for (uint32_t i = 0; i < 8; i++) {
+        bool value = events[i];
+        Serial.printf("[%lu]=%d ", i, value);
     }
     Serial.println();
 
-    // Write through the iterator proxy via operator=.
-    Serial.println("  clearing all bits via range-for...");
-    for (auto bit : events) {
-        bit = false;
+    // Clear all used bits.
+    Serial.println("  clearing bits 0-7...");
+    for (uint32_t i = 0; i < 8; i++) {
+        events[i] = false;
     }
 
     Serial.print("  bits 0-7 after clear: ");
-    i = 0;
-    for (const auto& bit : events) {
-        if (i < 8) {
-            Serial.printf("[%lu]=%d ", i, static_cast<bool>(bit));
-        }
-        i++;
+    for (uint32_t i = 0; i < 8; i++) {
+        Serial.printf("[%lu]=%d ", i, static_cast<bool>(events[i]));
     }
     Serial.println();
 }
@@ -254,7 +247,7 @@ void setup() {
 
     demo_read_write();
     demo_set_get();
-    demo_range_for();
+    demo_iteration();
     demo_isr();
     demo_tasks();      // starts background tasks — output continues in loop()
 }

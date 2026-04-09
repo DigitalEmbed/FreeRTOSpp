@@ -29,7 +29,7 @@ namespace freertos {
      * @brief Proxy object representing one bit inside an `event_group`.
      *
      * Returned by `event_group::operator[]`.  Supports read and write via
-     * implicit conversions and the `<<` / `>>` operators.
+     * implicit conversions and `operator=`.
      *
      * @note Never store an `event_bit_ref` across statements.  It holds a
      *       pointer into the parent `event_group`; if the group is destroyed
@@ -63,8 +63,8 @@ namespace freertos {
          * Follows the same convention as `std::bitset<N>::reference::operator=`.
          *
          * @code
-         * events[0] = true;    // set bit 0
-         * events[1] = false;   // clear bit 1
+         * events[0] = true;      // set bit 0
+         * events[1] = false;     // clear bit 1
          * events[0] = events[1]; // copy bit 1 into bit 0
          * @endcode
          *
@@ -135,20 +135,17 @@ namespace freertos {
          * @code
          * freertos::stack::event_group events;
          *
-         * events[0] << true;          // set bit 0
-         * events[1] << false;         // clear bit 1
+         * events[0] = true;           // set bit 0
+         * events[1] = false;          // clear bit 1
+         * events[0] = events[1];      // copy bit 1 into bit 0
          *
-         * bool b    = events[2];      // read bit 2 as bool
-         * int8_t v  = events[3];      // read bit 3 as int8_t (0 or 1)
+         * bool b   = events[2];       // read bit 2 as bool
+         * int8_t v = events[3];       // read bit 3 as int8_t (0 or 1)
          *
-         * events[4] >> b;             // read bit 4 into b
-         * b         << events[5];     // read bit 5 into b (alternative)
+         * if (!events.set(30, true))  {} // out-of-bounds: returns false
          *
-         * if (!events.set(30, true))  { // out-of-bounds: returns false }
-         * // events[30] << true;      // out-of-bounds: configASSERT + no-op
-         *
-         * for (const auto& bit : events) {
-         *     bool value = bit;       // iterate all max_event_group_bits bits
+         * for (uint32_t i = 0; i < constants::max_event_group_bits; i++) {
+         *     bool value = events[i]; // iterate with index available
          * }
          * @endcode
          */
@@ -230,46 +227,6 @@ namespace freertos {
 
             /** @brief Returns true if the event group was created successfully. */
             bool is_valid(void) const;
-
-            // -----------------------------------------------------------------
-            // Range-based for
-            // -----------------------------------------------------------------
-
-            /**
-             * @brief Forward iterator over all max_event_group_bits bits.
-             *
-             * Dereferences to an `event_bit_ref` proxy, supporting both read and write:
-             *
-             * @code
-             * for (const auto& bit : events) {
-             *     bool value = bit;   // read
-             * }
-             * @endcode
-             */
-            class iterator {
-            private:
-                event_group* parent;
-                uint32_t     index;
-
-            public:
-                /** @brief Constructs an iterator at @p index. */
-                iterator(event_group* parent, uint32_t index);
-
-                /** @brief Dereferences to a proxy for the current bit. */
-                event_bit_ref operator*(void);
-
-                /** @brief Advances to the next bit. */
-                iterator& operator++(void);
-
-                /** @brief Returns true while the loop has not reached the end. */
-                bool operator!=(const iterator& other) const;
-            };
-
-            /** @brief Returns an iterator to bit 0. */
-            iterator begin(void);
-
-            /** @brief Returns an iterator past the last bit. */
-            iterator end(void);
         };
 
     } // namespace abstract
@@ -304,8 +261,6 @@ namespace freertos {
             using abstract::event_group::set_from_isr;
             using abstract::event_group::get_from_isr;
             using abstract::event_group::is_valid;
-            using abstract::event_group::begin;
-            using abstract::event_group::end;
         };
 
     } // namespace stack
@@ -337,8 +292,6 @@ namespace freertos {
             using abstract::event_group::set_from_isr;
             using abstract::event_group::get_from_isr;
             using abstract::event_group::is_valid;
-            using abstract::event_group::begin;
-            using abstract::event_group::end;
         };
 
     } // namespace heap
