@@ -5,6 +5,10 @@ using namespace abstract;
 using namespace constants;
 using namespace typedefs;
 
+// =============================================================================
+// abstract::timer
+// =============================================================================
+
 timer::timer(timer_handle handle):
 handle(handle)
 {}

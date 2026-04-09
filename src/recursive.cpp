@@ -2,13 +2,9 @@
 
 using namespace freertos;
 
-stack::recursive::recursive(void) : abstract::semaphore(semaphore::type::recursive){
-    if (this->handle != nullptr) {
-        return;
-    }
-
-    this->handle = xSemaphoreCreateRecursiveMutexStatic(&this->buffer);
-}
+// =============================================================================
+// heap::recursive
+// =============================================================================
 
 heap::recursive::recursive(void) : abstract::semaphore(semaphore::type::recursive){
     if (this->handle != nullptr) {
@@ -16,4 +12,16 @@ heap::recursive::recursive(void) : abstract::semaphore(semaphore::type::recursiv
     }
 
     this->handle = xSemaphoreCreateRecursiveMutex();
+}
+
+// =============================================================================
+// stack::recursive
+// =============================================================================
+
+stack::recursive::recursive(void) : abstract::semaphore(semaphore::type::recursive){
+    if (this->handle != nullptr) {
+        return;
+    }
+
+    this->handle = xSemaphoreCreateRecursiveMutexStatic(&this->buffer);
 }

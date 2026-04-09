@@ -5,6 +5,10 @@ using namespace constants;
 using namespace typedefs;
 using namespace abstract;
 
+// =============================================================================
+// abstract::task
+// =============================================================================
+
 task::task(task_handle handle) : handle(handle) {}
 
 task::~task(void) {
@@ -20,7 +24,7 @@ bool task::resume(void) {
     if (!this->is_valid()) {
         return false;
     }
-    
+
     vTaskResume(this->handle);
     return true;
 }
@@ -29,7 +33,7 @@ bool task::resume_from_isr(void) {
     if (!this->is_valid()) {
         return false;
     }
-    
+
     xTaskResumeFromISR(this->handle);
     return true;
 }
@@ -77,6 +81,10 @@ task::info task::get_info(void) {
     return task::info(this->handle);
 }
 
+// =============================================================================
+// abstract::task::notifier
+// =============================================================================
+
 task::notifier::notifier(task_handle handle) : handle(handle) {}
 
 bool task::notifier::signal(u_base_type index, bool resume) {
@@ -85,7 +93,7 @@ bool task::notifier::signal(u_base_type index, bool resume) {
     }
 
     uint32_t dummy = 0;
-    
+
     #if defined(configTASK_NOTIFICATION_ARRAY_ENTRIES)
         if (xTaskNotifyAndQueryIndexed(this->handle, index, dummy, eNoAction, &this->last_value) != pdPASS){
             return false;
@@ -132,6 +140,7 @@ bool task::notifier::set_bits(uint32_t bits, u_base_type index, bool resume) {
     if (index > constants::max_notifications){
         return false;
     }
+
     #if defined(configTASK_NOTIFICATION_ARRAY_ENTRIES)
         if (xTaskNotifyAndQueryIndexed(this->handle, index, bits, eSetBits, &this->last_value) != pdPASS){
             return false;
@@ -223,7 +232,7 @@ bool task::notifier::overwrite_value(uint32_t value, u_base_type index, bool res
     if (index > constants::max_notifications){
         return false;
     }
-    
+
     #if defined(configTASK_NOTIFICATION_ARRAY_ENTRIES)
         if (xTaskNotifyAndQueryIndexed(this->handle, index, value, eSetValueWithOverwrite, &this->last_value) != pdPASS){
             return false;
@@ -245,9 +254,9 @@ bool task::notifier::overwrite_value_from_isr(uint32_t value, u_base_type index,
     if (index > constants::max_notifications){
         return false;
     }
-    
+
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    
+
     #if defined(configTASK_NOTIFICATION_ARRAY_ENTRIES)
         if (xTaskNotifyAndQueryIndexedFromISR(this->handle, index, value, eSetValueWithOverwrite, &this->last_value, &xHigherPriorityTaskWoken) != pdPASS){
             return false;
@@ -291,7 +300,7 @@ bool task::notifier::send_value_from_isr(uint32_t value, u_base_type index, bool
     if (index > constants::max_notifications){
         return false;
     }
-    
+
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     #if defined(configTASK_NOTIFICATION_ARRAY_ENTRIES)
@@ -315,7 +324,7 @@ bool task::notifier::clear(u_base_type index, bool resume) {
     if (index > constants::max_notifications){
         return false;
     }
-    
+
     #if defined(configTASK_NOTIFICATION_ARRAY_ENTRIES)
         if (xTaskNotifyAndQueryIndexed(this->handle, index, 0, eSetValueWithoutOverwrite, &this->last_value) != pdPASS){
             return false;
@@ -337,7 +346,7 @@ bool task::notifier::clear_from_isr(u_base_type index, bool resume) {
     if (index > constants::max_notifications){
         return false;
     }
-    
+
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     #if defined(configTASK_NOTIFICATION_ARRAY_ENTRIES)
@@ -361,6 +370,10 @@ uint32_t task::notifier::get_last_value(void) const {
     return this->last_value;
 }
 
+// =============================================================================
+// abstract::task::info
+// =============================================================================
+
 task::info::info(task_handle handle) : handle(handle) {}
 
 uint16_t task::info::get_priority(void) const {
@@ -371,24 +384,28 @@ uint32_t task::info::get_free_stack_memory(void) const {
     return uxTaskGetStackHighWaterMark(this->handle) * sizeof(task_stack);
 }
 
-task::info::state task::info::get_state(void) const {    
-        switch (eTaskGetState(this->handle)) {
-            case eReady: return state::ready;
-            case eRunning: return state::running;
-            case eBlocked: return state::blocked;
-            case eSuspended: return state::suspended;
-            case eDeleted: return state::deleted;
-            default: return state::invalid;
-        }
+task::info::state task::info::get_state(void) const {
+    switch (eTaskGetState(this->handle)) {
+        case eReady:     return state::ready;
+        case eRunning:   return state::running;
+        case eBlocked:   return state::blocked;
+        case eSuspended: return state::suspended;
+        case eDeleted:   return state::deleted;
+        default:         return state::invalid;
+    }
 }
 
-const char* task::info::get_name(void) const {   
+const char* task::info::get_name(void) const {
     #if (tskKERNEL_VERSION_MAJOR > 8)
         return pcTaskGetName(this->handle);
     #else
         return pcTaskGetTaskName(this->handle);
     #endif
 }
+
+// =============================================================================
+// abstract::task::self
+// =============================================================================
 
 task_handle task::self::get_handle(void) {
     return xTaskGetCurrentTaskHandle();
@@ -410,7 +427,7 @@ bool task::self::get_notification(uint32_t& notification_value, u_base_type inde
     if (index > constants::max_notifications){
         return false;
     }
-    
+
     #if defined(configTASK_NOTIFICATION_ARRAY_ENTRIES)
         return xTaskNotifyWaitIndexed(index, 0x00, 0xFFFFFFFF, &notification_value, pdMS_TO_TICKS(timeout_ms)) == pdPASS;
     #else

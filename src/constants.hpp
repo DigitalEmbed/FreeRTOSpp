@@ -41,6 +41,19 @@ namespace freertos {
 
         /** @brief Minimum allowed task stack size in words, as configured by configMINIMAL_STACK_SIZE. */
         constexpr uint32_t min_stack_size = configMINIMAL_STACK_SIZE;
+
+        /**
+         * @brief Maximum number of usable bits in an event group.
+         *
+         * FreeRTOS always reserves the top 8 bits of `EventBits_t` for internal
+         * control flags.  The usable count therefore depends on the target platform:
+         *  - 32-bit ticks (`configUSE_16_BIT_TICKS = 0`, default on STM32/ESP32): **24 bits**
+         *  - 16-bit ticks (`configUSE_16_BIT_TICKS = 1`, typical on 8-bit AVR):   **8 bits**
+         *
+         * This constant is computed directly from `sizeof(EventBits_t)` so it always
+         * reflects the correct ceiling for the current toolchain and FreeRTOS configuration.
+         */
+        constexpr uint32_t max_event_group_bits = sizeof(EventBits_t) * 8u - 8u;
     }
 
 }

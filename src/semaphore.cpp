@@ -3,6 +3,10 @@
 using namespace freertos;
 using namespace abstract;
 
+// =============================================================================
+// abstract::semaphore
+// =============================================================================
+
 semaphore::semaphore(type semaphore_type) :
 semaphore_type(semaphore_type)
 {}

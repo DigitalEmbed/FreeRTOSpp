@@ -5,6 +5,10 @@
 using namespace freertos;
 using namespace typedefs;
 
+// =============================================================================
+// freertos::system
+// =============================================================================
+
 tick_type system::get_tick_count(void) {
     return xTaskGetTickCount();
 }

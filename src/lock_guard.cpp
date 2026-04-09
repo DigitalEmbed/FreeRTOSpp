@@ -4,6 +4,10 @@ using namespace freertos;
 
 #include "esp_log.h"
 
+// =============================================================================
+// freertos::lock_guard
+// =============================================================================
+
 lock_guard::lock_guard(abstract::semaphore& semaphore, uint32_t timeout_ms) :
 semaphore(semaphore)
 {

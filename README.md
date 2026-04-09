@@ -341,6 +341,14 @@ See the [`examples/`](examples/) directory for fully annotated code:
 | [`04_semaphores_and_locks`](examples/04_semaphores_and_locks.ino) | `stack::binary`, `stack::counting`, `stack::mutex` + `lock_guard`, `stack::recursive`, `abstract::semaphore&` polymorphism, `heap::mutex` |
 | [`05_queues_and_collections`](examples/05_queues_and_collections.ino) | `stack::fifo`, `heap::fifo`, `stack::lifo`, `heap::lifo`, `stack::singleton`, `push/pop_from_isr` |
 | [`06_advanced_tasks`](examples/06_advanced_tasks.ino) | `delay_for`, `suspend_for`, `yield`, `join`, `system::*`, `heap::shared_data`, all notifier modes (`signal`, `set_bits`, `increment`, `overwrite_value`, `send_value`, `clear`), notifier ISR variants |
+| [`07_event_groups`](examples/07_event_groups.ino) | `stack::event_group`, `operator[]`, `<<`/`>>` proxy operators, `set()`/`get()`, `set_from_isr()`/`get_from_isr()`, range-based for, bounds enforcement |
+
+---
+
+## Roadmap
+
+- **Stream Buffers** — single-producer / single-consumer byte stream with variable-length reads and writes (`stack::stream_buffer`, `heap::stream_buffer`).
+- **Message Buffers** — built on top of stream buffers; preserves discrete message boundaries (`stack::message_buffer`, `heap::message_buffer`).
 
 ---
 

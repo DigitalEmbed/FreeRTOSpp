@@ -3,6 +3,10 @@
 using namespace freertos;
 using namespace abstract;
 
+// =============================================================================
+// abstract::app
+// =============================================================================
+
 app::app(freertos::abstract::task& task) : task(task) {}
 
 bool app::start(bool is_from_isr){
@@ -15,7 +19,7 @@ bool app::start(bool is_from_isr){
 
 bool app::stop(bool is_from_isr){
     bool status = is_from_isr ? this->task.suspend_from_isr() : this->task.suspend();
-    
+
     if (status){
         this->task.join();
     }

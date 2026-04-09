@@ -10,6 +10,7 @@
 #include "fifo.hpp"
 #include "lifo.hpp"
 #include "singleton.hpp"
+#include "event_group.hpp"
 
 #include "timer.hpp"
 
